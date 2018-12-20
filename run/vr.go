@@ -18,7 +18,7 @@ func NewVirtualRun(db *database.Database) *VirtualRun {
 func (v *VirtualRun) AllAthleteCredentials() []AthleteCredential {
 	creds := []AthleteCredential{}
 	tokens := []InvertedToken{}
-	e := v.db.List("athlete", bson.M{}, &tokens)
+	e := v.db.List("athlete", bson.M{}, []string{"_id"}, &tokens)
 	if e == nil {
 		for _, t := range tokens {
 			creds = append(creds, AthleteCredential{
@@ -80,4 +80,8 @@ func (v *VirtualRun) SaveToken(token *Token) error {
 	return v.db.Upsert("athlete", bson.M{
 		"_id": token.ID,
 	}, invToken)
+}
+
+func (v *VirtualRun) UnexpiredVr(output *[]VirtualRun) error {
+	return v.db.List("virtualrun", bson.M{}, []string{"-startdate"}, output)
 }

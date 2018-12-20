@@ -29,8 +29,8 @@ func (db *Database) Get(collection string, filter, output interface{}) error {
 	return q.Select(bson.M{}).One(output)
 }
 
-func (db *Database) List(collection string, filter, output interface{}) error {
-	return db.db.C(collection).Find(filter).All(output)
+func (db *Database) List(collection string, filter interface{}, order []string, output interface{}) error {
+	return db.db.C(collection).Find(filter).Sort(order...).All(output)
 }
 
 func (db *Database) InsertBulk(collection string, data []interface{}) error {

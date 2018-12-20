@@ -12,7 +12,7 @@ func (v *VirtualRun) AthleteSummary(id uint32) (*Stats, error) {
 	activities := []Activity{}
 
 	now := time.Now()
-	currentYear, currentMonth, currentDay := now.Date()
+	currentYear, currentMonth, _ := now.Date()
 	currentLocation := now.Location()
 
 	firstOfYear := time.Date(currentYear, 1, 1, 0, 0, 0, 0, currentLocation)
@@ -26,7 +26,7 @@ func (v *VirtualRun) AthleteSummary(id uint32) (*Stats, error) {
 		"startdate": bson.M{
 			"$gte": firstOfYearStamp,
 		},
-	}, &activities)
+	}, []string{"-startdate"}, &activities)
 
 	if e != nil {
 		return nil, e
@@ -50,15 +50,16 @@ func (v *VirtualRun) AthleteSummary(id uint32) (*Stats, error) {
 			stats.ThisMonthRunTotals.ElevationGain += activity.ElevationGain
 			stats.ThisMonthRunTotals.MovingTime += activity.MovingTime
 
-			if currentDay == dateTaken.Day() {
-				stats.RecentRun.Distance = activity.Distance
-				stats.RecentRun.Title = activity.Title
-				stats.RecentRun.ElapsedTime = activity.ElapsedTime
-				stats.RecentRun.MovingTime = activity.MovingTime
-				stats.RecentRun.StartDate = activity.StartDate
-				stats.RecentRun.TimeZoneOffset = activity.TimeZoneOffset
-			}
 		}
+	}
+
+	if len(activities) > 0 {
+		stats.RecentRun.Distance = activities[0].Distance
+		stats.RecentRun.Title = activities[0].Title
+		stats.RecentRun.ElapsedTime = activities[0].ElapsedTime
+		stats.RecentRun.MovingTime = activities[0].MovingTime
+		stats.RecentRun.StartDate = activities[0].StartDate
+		stats.RecentRun.TimeZoneOffset = activities[0].TimeZoneOffset
 	}
 
 	return stats, nil
