@@ -160,6 +160,23 @@ func (v *VirtualRun) Join(id string, eng *Engagement) error {
 		return nil
 	}
 
+	vr, e := v.FromLink(id)
+	if e != nil {
+		return e
+	}
+
+	activities, e := v.AthleteActivities(eng.AthleteID, vr.Period)
+	if e != nil {
+		return e
+	}
+
+	taken_distance := 0.0
+	for _, activity := range activities {
+		taken_distance += activity.Distance
+	}
+
+	eng.TakenDistance = taken_distance
+
 	return v.db.Push("virtualrun", bson.M{
 		"link": id,
 	}, bson.M{
