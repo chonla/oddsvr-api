@@ -2,17 +2,37 @@ package run
 
 import (
 	"github.com/chonla/oddsvr-api/database"
+	"github.com/chonla/rnd"
 	"github.com/globalsign/mgo/bson"
+	"github.com/labstack/echo"
 )
 
 type VirtualRun struct {
 	db *database.Database
 }
 
+type Vr struct {
+	ID              bson.ObjectId `json:"_id,omitempty" bson:"_id,omitempty"`
+	CreatedBy       uint32        `json:"created_by" bson:"created_by"`
+	CreatedDateTime string        `json:"created_datetime" bson:"created_datetime"`
+	Title           string        `json:"title" bson:"title"`
+	Detail          string        `json:"detail" bson:"detail"`
+	Period          []string      `json:"period" bson:"period"`
+	Link            string        `json:"link" bson:"link"`
+}
+
 func NewVirtualRun(db *database.Database) *VirtualRun {
 	return &VirtualRun{
 		db: db,
 	}
+}
+
+func (v *VirtualRun) FromContext(c echo.Context) (*Vr, error) {
+	vr := new(Vr)
+	if err := c.Bind(vr); err != nil {
+		return nil, err
+	}
+	return vr, nil
 }
 
 func (v *VirtualRun) AllAthleteCredentials() []AthleteCredential {
@@ -82,6 +102,31 @@ func (v *VirtualRun) SaveToken(token *Token) error {
 	}, invToken)
 }
 
-func (v *VirtualRun) UnexpiredVr(output *[]VirtualRun) error {
-	return v.db.List("virtualrun", bson.M{}, []string{"-startdate"}, output)
+func (v *VirtualRun) SaveVr(vr *Vr) error {
+	return v.db.Insert("virtualrun", vr)
+}
+
+func (v *VirtualRun) Exists(link string) bool {
+	return v.db.Has("virtualrun", bson.M{
+		"link": link,
+	})
+}
+
+func (v *VirtualRun) FromLink(link string) (Vr, error) {
+	vr := Vr{}
+	e := v.db.Get("virtualrun", bson.M{
+		"link": link,
+	}, &vr)
+	return vr, e
+}
+
+func (v *VirtualRun) UnexpiredRuns() ([]Vr, error) {
+	vrs := []Vr{}
+	e := v.db.List("virtualrun", bson.M{}, []string{"-startdate"}, &vrs)
+	return vrs, e
+}
+
+func (v *VirtualRun) CreateSafeVrLink() string {
+	link := rnd.Alphanum(12)
+	return link
 }

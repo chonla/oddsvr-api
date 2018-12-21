@@ -56,6 +56,7 @@ func (a *API) Start() {
 	// Public endpoints
 	r := server.Group("/api")
 	r.GET("/gateway", h.Gateway)
+	r.GET("/vr/:id", h.Vr)
 
 	// Private endpoints
 	jwtConfig := middleware.JWTConfig{
@@ -64,6 +65,8 @@ func (a *API) Start() {
 	}
 	r.Use(middleware.JWTWithConfig(jwtConfig))
 	r.GET("/me", h.Me)
+	r.GET("/vr", h.Vrs)
+	r.POST("/vr", h.CreateVr)
 
 	logger.Info(fmt.Sprintf("server is listening on %s", a.conf.ServiceAddress))
 	server.Logger.Fatal(server.Start(a.conf.ServiceAddress))

@@ -42,7 +42,21 @@ func (db *Database) Upsert(collection string, filter, data interface{}) error {
 	return e
 }
 
+func (db *Database) Insert(collection string, data interface{}) error {
+	e := db.db.C(collection).Insert(data)
+	return e
+}
+
 func (db *Database) Replace(collection string, filter, data interface{}) error {
 	e := db.db.C(collection).Update(filter, data)
 	return e
+}
+
+func (db *Database) Has(collection string, filter interface{}) bool {
+	q := db.db.C(collection).Find(filter).Limit(1)
+	count, e := q.Count()
+	if e != nil {
+		return false
+	}
+	return (count > 0)
 }
