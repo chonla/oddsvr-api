@@ -65,8 +65,10 @@ func (a *API) Start() {
 	}
 	r.Use(middleware.JWTWithConfig(jwtConfig))
 	r.GET("/me", h.Me)
+	r.GET("/me/vr", h.JoinedVrs)
 	r.GET("/vr", h.Vrs)
 	r.POST("/vr", h.CreateVr)
+	r.POST("/join/:id", h.JoinVr)
 
 	logger.Info(fmt.Sprintf("server is listening on %s", a.conf.ServiceAddress))
 	server.Logger.Fatal(server.Start(a.conf.ServiceAddress))

@@ -52,6 +52,13 @@ func (db *Database) Replace(collection string, filter, data interface{}) error {
 	return e
 }
 
+func (db *Database) Push(collection string, filter, data interface{}) error {
+	e := db.db.C(collection).Update(filter, bson.M{
+		"$push": data,
+	})
+	return e
+}
+
 func (db *Database) Has(collection string, filter interface{}) bool {
 	q := db.db.C(collection).Find(filter).Limit(1)
 	count, e := q.Count()

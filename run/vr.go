@@ -19,6 +19,7 @@ type Vr struct {
 	Detail          string        `json:"detail" bson:"detail"`
 	Period          []string      `json:"period" bson:"period"`
 	Link            string        `json:"link" bson:"link"`
+	Engagements     []Engagement  `json:"engagements" bson:"engagements"`
 }
 
 func NewVirtualRun(db *database.Database) *VirtualRun {
@@ -126,7 +127,42 @@ func (v *VirtualRun) UnexpiredRuns() ([]Vr, error) {
 	return vrs, e
 }
 
+func (v *VirtualRun) Joined(id uint32) ([]Vr, error) {
+	vrs := []Vr{}
+	e := v.db.List("virtualrun", bson.M{
+		"engagements": bson.M{
+			"$elemMatch": bson.M{
+				"athlete_id": id,
+			},
+		},
+	}, []string{"-startdate"}, &vrs)
+	return vrs, e
+}
+
 func (v *VirtualRun) CreateSafeVrLink() string {
 	link := rnd.Alphanum(12)
 	return link
+}
+
+func (v *VirtualRun) HasJoined(id string, athleteID uint32) bool {
+	return v.db.Has("virtualrun", bson.M{
+		"link": id,
+		"engagements": bson.M{
+			"$elemMatch": bson.M{
+				"athlete_id": athleteID,
+			},
+		},
+	})
+}
+
+func (v *VirtualRun) Join(id string, eng *Engagement) error {
+	if v.HasJoined(id, eng.AthleteID) {
+		return nil
+	}
+
+	return v.db.Push("virtualrun", bson.M{
+		"link": id,
+	}, bson.M{
+		"engagements": eng,
+	})
 }
