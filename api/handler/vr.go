@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/chonla/oddsvr-api/jwt"
@@ -81,7 +82,14 @@ func (h *Handler) JoinVr(c echo.Context) error {
 
 	id := c.Param("id")
 	if h.vr.Exists(id) {
+
+		me, e := h.vr.Profile(uid)
+		if e != nil {
+			return c.JSON(http.StatusInternalServerError, e)
+		}
+
 		eng.AthleteID = uid
+		eng.AthleteName = strings.TrimSpace(fmt.Sprintf("%s %s", me.FirstName, me.LastName))
 
 		e = h.vr.Join(id, eng)
 		if e != nil {

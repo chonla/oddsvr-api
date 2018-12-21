@@ -1,5 +1,7 @@
 package run
 
+import "github.com/globalsign/mgo/bson"
+
 type AthleteCredential struct {
 	ID           uint32
 	AccessToken  string
@@ -65,4 +67,18 @@ type Activity struct {
 
 type StravaAthlete struct {
 	ID uint32 `json:"id"`
+}
+
+func (v *VirtualRun) Profile(id uint32) (*Athlete, error) {
+	invToken := &InvertedToken{}
+	athlete := &Athlete{}
+
+	e := v.db.Get("athlete", bson.M{"_id": id}, invToken)
+
+	if e != nil {
+		return nil, e
+	}
+	athlete = &invToken.Athlete
+
+	return athlete, nil
 }
