@@ -14,6 +14,7 @@ import (
 )
 
 type Conf struct {
+	AppVersion         string
 	DBConnection       string
 	ServiceAddress     string
 	FrontBaseURL       string
@@ -48,6 +49,7 @@ func (a *API) Start() {
 	vr := run.NewVirtualRun(db)
 	j := jwt.NewJWT(a.conf.JWTSecret)
 	conf := &handler.Conf{
+		AppVersion:   a.conf.AppVersion,
 		FrontBaseURL: a.conf.FrontBaseURL,
 	}
 
@@ -57,6 +59,7 @@ func (a *API) Start() {
 	r := server.Group("/api")
 	r.GET("/gateway", h.Gateway)
 	r.GET("/vr/:id", h.Vr)
+	r.GET("/version", h.Version)
 
 	// Private endpoints
 	jwtConfig := middleware.JWTConfig{

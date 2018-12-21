@@ -14,6 +14,7 @@ type Handler struct {
 }
 
 type Conf struct {
+	AppVersion   string
 	FrontBaseURL string
 }
 

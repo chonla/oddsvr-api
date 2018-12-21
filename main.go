@@ -8,6 +8,8 @@ import (
 	"github.com/chonla/oddsvr-api/logger"
 )
 
+var AppVersion string
+
 func main() {
 
 	dbServer := env("ODDSVR_DB", "127.0.0.1:27017", "Database address", false)
@@ -18,6 +20,7 @@ func main() {
 	jwtSecret := env("ODDSVR_JWT_SECRET", "", "JWT secret", true)
 
 	conf := &api.Conf{
+		AppVersion:         AppVersion,
 		DBConnection:       dbServer,
 		ServiceAddress:     boundAddress,
 		FrontBaseURL:       frontBase,
