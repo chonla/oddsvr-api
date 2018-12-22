@@ -37,6 +37,13 @@ func (db *Database) InsertBulk(collection string, data []interface{}) error {
 	return db.db.C(collection).Insert(data...)
 }
 
+func (db *Database) Update(collection string, filter, data interface{}) error {
+	e := db.db.C(collection).Update(filter, bson.M{
+		"$set": data,
+	})
+	return e
+}
+
 func (db *Database) Upsert(collection string, filter, data interface{}) error {
 	_, e := db.db.C(collection).Upsert(filter, data)
 	return e
@@ -44,6 +51,11 @@ func (db *Database) Upsert(collection string, filter, data interface{}) error {
 
 func (db *Database) Insert(collection string, data interface{}) error {
 	e := db.db.C(collection).Insert(data)
+	return e
+}
+
+func (db *Database) Delete(collection string, filter interface{}) error {
+	e := db.db.C(collection).Remove(filter)
 	return e
 }
 
@@ -55,6 +67,13 @@ func (db *Database) Replace(collection string, filter, data interface{}) error {
 func (db *Database) Push(collection string, filter, data interface{}) error {
 	e := db.db.C(collection).Update(filter, bson.M{
 		"$push": data,
+	})
+	return e
+}
+
+func (db *Database) Pull(collection string, filter, data interface{}) error {
+	e := db.db.C(collection).Update(filter, bson.M{
+		"$pull": data,
 	})
 	return e
 }

@@ -72,6 +72,9 @@ func (a *API) Start() {
 	r.GET("/vr", h.Vrs)
 	r.POST("/vr", h.CreateVr)
 	r.POST("/join/:id", h.JoinVr)
+	r.POST("/leave/:id", h.LeaveVr)
+	r.PATCH("/vr/:id", h.UpdateVr)
+	r.DELETE("/vr/:id", h.DeleteVr)
 
 	logger.Info(fmt.Sprintf("server is listening on %s", a.conf.ServiceAddress))
 	server.Logger.Fatal(server.Start(a.conf.ServiceAddress))

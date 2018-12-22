@@ -32,6 +32,40 @@ func (h *Handler) Vrs(c echo.Context) error {
 	return c.JSON(http.StatusOK, vrs)
 }
 
+func (h *Handler) UpdateVr(c echo.Context) error {
+	user := c.Get("user").(*jwtgo.Token)
+	claims := user.Claims.(*jwt.Claims)
+	uid := claims.ID
+
+	id := c.Param("id")
+	if h.vr.Exists(id) {
+		vr, e := h.vr.FromLink(id)
+
+		if vr.CreatedBy != uid {
+			return c.NoContent(http.StatusForbidden)
+		}
+
+		vrContext, e := h.vr.FromContext(c)
+		if e != nil {
+			return c.JSON(http.StatusInternalServerError, e)
+		}
+
+		vr.Title = vrContext.Title
+		vr.Period = vrContext.Period
+		vr.Detail = vrContext.Detail
+
+		e = h.vr.UpdateVr(&vr)
+		if e != nil {
+			return c.JSON(http.StatusInternalServerError, e)
+		}
+		c.Response().Header().Add("Location", fmt.Sprintf("/vr/%s", vr.Link))
+		c.Response().Header().Add("X-Updated-Vr-ID", vr.ID.String())
+
+		return c.JSON(http.StatusOK, vr)
+	}
+	return c.NoContent(http.StatusNotFound)
+}
+
 func (h *Handler) CreateVr(c echo.Context) error {
 	user := c.Get("user").(*jwtgo.Token)
 	claims := user.Claims.(*jwt.Claims)
@@ -96,6 +130,44 @@ func (h *Handler) JoinVr(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, e)
 		}
 		return c.NoContent(http.StatusCreated)
+	}
+	return c.NoContent(http.StatusNotFound)
+}
+
+func (h *Handler) LeaveVr(c echo.Context) error {
+	user := c.Get("user").(*jwtgo.Token)
+	claims := user.Claims.(*jwt.Claims)
+	uid := claims.ID
+
+	id := c.Param("id")
+	if h.vr.Exists(id) {
+		e := h.vr.Leave(id, uid)
+		if e != nil {
+			return c.JSON(http.StatusInternalServerError, e)
+		}
+		return c.NoContent(http.StatusOK)
+	}
+	return c.NoContent(http.StatusNotFound)
+}
+
+func (h *Handler) DeleteVr(c echo.Context) error {
+	user := c.Get("user").(*jwtgo.Token)
+	claims := user.Claims.(*jwt.Claims)
+	uid := claims.ID
+
+	id := c.Param("id")
+	if h.vr.Exists(id) {
+
+		vr, e := h.vr.FromLink(id)
+		if vr.CreatedBy != uid {
+			return c.NoContent(http.StatusForbidden)
+		}
+
+		e = h.vr.Delete(id)
+		if e != nil {
+			return c.JSON(http.StatusInternalServerError, e)
+		}
+		return c.NoContent(http.StatusOK)
 	}
 	return c.NoContent(http.StatusNotFound)
 }

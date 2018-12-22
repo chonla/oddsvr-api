@@ -107,6 +107,16 @@ func (v *VirtualRun) SaveVr(vr *Vr) error {
 	return v.db.Insert("virtualrun", vr)
 }
 
+func (v *VirtualRun) UpdateVr(vr *Vr) error {
+	return v.db.Update("virtualrun", bson.M{
+		"_id": vr.ID,
+	}, bson.M{
+		"title":  vr.Title,
+		"detail": vr.Detail,
+		"period": vr.Period,
+	})
+}
+
 func (v *VirtualRun) Exists(link string) bool {
 	return v.db.Has("virtualrun", bson.M{
 		"link": link,
@@ -152,6 +162,22 @@ func (v *VirtualRun) HasJoined(id string, athleteID uint32) bool {
 				"athlete_id": athleteID,
 			},
 		},
+	})
+}
+
+func (v *VirtualRun) Leave(id string, athleteID uint32) error {
+	return v.db.Pull("virtualrun", bson.M{
+		"link": id,
+	}, bson.M{
+		"engagements": bson.M{
+			"athlete_id": athleteID,
+		},
+	})
+}
+
+func (v *VirtualRun) Delete(id string) error {
+	return v.db.Delete("virtualrun", bson.M{
+		"link": id,
 	})
 }
 
