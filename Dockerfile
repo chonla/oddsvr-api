@@ -1,4 +1,4 @@
-FROM golang:1.11.3-alpine AS builder
+FROM golang:1.11.4-alpine AS builder
 
 WORKDIR /go/src/github.com/chonla/oddsvr-api
 
