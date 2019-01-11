@@ -8,6 +8,7 @@ ARG APP_VERSION
 
 RUN apk add --no-cache git \
     && go get ./... \
+    && go test ./... \
     && GOOS=linux GOARCH=amd64 go build -o oddsvr-api -ldflags "-X main.AppVersion=${APP_VERSION}"
 
 
