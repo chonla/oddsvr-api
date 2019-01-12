@@ -28,7 +28,7 @@ func (j *JWT) Generate(token *run.Token) (string, error) {
 		ID:          token.ID,
 		StravaToken: token.AccessToken,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 3).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour * 168).Unix(),
 		},
 	}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
