@@ -27,11 +27,11 @@ func (h *Handler) Gateway(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, fmt.Sprint(e))
 	}
 
-	jwtAge, _ := time.ParseDuration("3h")
+	jwtAge, _ := time.ParseDuration("168h")
 	jwtCookie := httpclient.NewCookie("token", jwtToken, jwtAge, "/")
 	c.SetCookie(jwtCookie)
 
-	idAge, _ := time.ParseDuration("3h")
+	idAge, _ := time.ParseDuration("168h")
 	idCookie := httpclient.NewCookie("me", fmt.Sprintf("%d", token.ID), idAge, "/")
 	c.SetCookie(idCookie)
 
