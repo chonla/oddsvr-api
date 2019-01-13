@@ -11,9 +11,9 @@ import (
 func (h *Handler) Me(c echo.Context) error {
 	user := c.Get("user").(*jwtgo.Token)
 	claims := user.Claims.(*jwt.Claims)
-	token := claims.StravaToken
+	uid := claims.ID
 
-	me, e := h.strava.Athlete(token)
+	me, e := h.vr.Profile(uid)
 	if e != nil {
 		return c.JSON(http.StatusInternalServerError, e)
 	}

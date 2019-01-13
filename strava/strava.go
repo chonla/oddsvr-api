@@ -30,6 +30,20 @@ func NewStrava(clientID, clientSecret string) *Strava {
 	}
 }
 
+// RefreshToken when existing token expired
+func (s *Strava) RefreshToken(token string) (*run.Token, error) {
+	newToken := &run.Token{}
+	client := httpclient.NewClient()
+	data := fmt.Sprintf("client_id=%s&client_secret=%s&grant_type=refresh_token&refresh_token=%s", s.clientID, s.clientSecret, token)
+	e := client.PostForm(fmt.Sprintf("%s/oauth/token", APIBASE), data, newToken)
+	if e != nil {
+		return nil, e
+	}
+
+	return newToken, nil
+}
+
+// ExchangeToken when first contact to Strava
 func (s *Strava) ExchangeToken(code string) (*run.Token, error) {
 	tokenEx := TokenExchange{
 		ClientID:     s.clientID,
